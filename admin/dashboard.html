@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - MI Nurul Islam</title>
+    <link rel="stylesheet" href="../src/css/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js"></script>
+    <style>
+        .dashboard-container {
+            padding: 2rem 5%;
+            margin-top: 72px;
+            min-height: calc(100vh - 72px);
+            background: #f8f9fa;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .welcome-text {
+            color: var(--primary-color);
+        }
+
+        .welcome-text h1 {
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-text p {
+            color: #666;
+        }
+
+        .logout-btn {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .logout-btn:hover {
+            background: #b91c1c;
+            transform: translateY(-2px);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f3f4f6;
+        }
+
+        .card-title {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(22, 101, 52, 0.1);
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .preview-container {
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .preview-container img {
+            max-width: 200px;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .preview-container p {
+            color: #666;
+            font-size: 0.875rem;
+        }
+
+        .submit-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            width: 100%;
+        }
+
+        .submit-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .content-list {
+            margin-top: 2rem;
+            border-top: 2px solid #f3f4f6;
+            padding-top: 2rem;
+        }
+
+        .content-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .content-item:hover {
+            transform: translateX(5px);
+            background: #f3f4f6;
+        }
+
+        .content-thumbnail {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .content-info {
+            flex: 1;
+        }
+
+        .content-title {
+            font-weight: 500;
+            color: var(--text-color);
+            margin-bottom: 0.25rem;
+        }
+
+        .content-date {
+            font-size: 0.875rem;
+            color: #666;
+        }
+
+        .content-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .edit-btn,
+        .delete-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .edit-btn {
+            background: #0891b2;
+            color: white;
+        }
+
+        .edit-btn:hover {
+            background: #0e7490;
+        }
+
+        .delete-btn {
+            background: #dc2626;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: #b91c1c;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 1rem 0;
+        }
+
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .success-message {
+            background: #dcfce7;
+            color: #166534;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .modal-title {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+
+            .content-item {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .content-actions {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <img src="../src/img/logo.jpg" alt="Logo MI Nurul Islam" class="logo">
+            <span>Dashboard Admin</span>
+        </div>
+        <button class="nav-toggle">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="nav-links">
+            <button onclick="handleLogout()" class="logout-btn">Logout</button>
+        </div>
+    </nav>
+
+    <main class="dashboard-container">
+        <div class="dashboard-header">
+            <div class="welcome-text">
+                <h1>Dashboard Admin</h1>
+                <p id="welcomeMessage">Selamat datang di panel admin MI Nurul Islam</p>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Galeri Section -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h2 class="card-title">Tambah Foto Galeri</h2>
+                </div>
+
+                <form id="galleryForm" onsubmit="handleGallerySubmit(event)">
+                    <input type="hidden" id="galleryId">
+                    <div class="form-group">
+                        <label for="galleryTitle">Judul Foto</label>
+                        <input 
+                            type="text" 
+                            id="galleryTitle" 
+                            required 
+                            placeholder="Masukkan judul foto"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="galleryImage">Pilih Foto</label>
+                        <input 
+                            type="file" 
+                            id="galleryImage" 
+                            accept="image/*" 
+                            onchange="previewImage(event, 'galleryPreviewContainer', 'galleryFileName')"
+                        >
+                        <div id="galleryPreviewContainer" class="preview-container">
+                            <img id="galleryPreview">
+                            <p id="galleryFileName"></p>
+                        </div>
+                    </div>
+
+                    <div id="galleryLoading" class="loading">
+                        <div class="loading-spinner"></div>
+                        <p>Mengunggah foto...</p>
+                    </div>
+
+                    <div id="galleryError" class="error-message"></div>
+                    <div id="gallerySuccess" class="success-message">Foto berhasil ditambahkan!</div>
+
+                    <button type="submit" class="submit-btn" id="gallerySubmitBtn">Tambah Foto</button>
+                </form>
+
+                <div class="content-list" id="galleryList">
+                    <!-- Gallery items will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Informasi Section -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h2 class="card-title">Tambah Informasi</h2>
+                </div>
+
+                <form id="infoForm" onsubmit="handleInfoSubmit(event)">
+                    <input type="hidden" id="infoId">
+                    <div class="form-group">
+                        <label for="infoTitle">Judul Informasi</label>
+                        <input 
+                            type="text" 
+                            id="infoTitle" 
+                            required 
+                            placeholder="Masukkan judul informasi"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="infoContent">Isi Informasi</label>
+                        <textarea 
+                            id="infoContent" 
+                            required 
+                            placeholder="Tulis isi informasi"
+                        ></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="infoImage">Gambar (Opsional)</label>
+                        <input 
+                            type="file" 
+                            id="infoImage" 
+                            accept="image/*"
+                            onchange="previewImage(event, 'infoPreviewContainer', 'infoFileName')"
+                        >
+                        <div id="infoPreviewContainer" class="preview-container">
+                            <img id="infoPreview">
+                            <p id="infoFileName"></p>
+                        </div>
+                    </div>
+
+                    <div id="infoLoading" class="loading">
+                        <div class="loading-spinner"></div>
+                        <p>Menyimpan informasi...</p>
+                    </div>
+
+                    <div id="infoError" class="error-message"></div>
+                    <div id="infoSuccess" class="success-message">Informasi berhasil ditambahkan!</div>
+
+                    <button type="submit" class="submit-btn" id="infoSubmitBtn">Tambah Informasi</button>
+                </form>
+
+                <div class="content-list" id="infoList">
+                    <!-- Info items will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <button type="button" class="modal-close" onclick="closeDeleteModal()">&times;</button>
+            <h2 class="modal-title">Konfirmasi Hapus</h2>
+            <p>Apakah Anda yakin ingin menghapus item ini?</p>
+            <div id="modalError" class="error-message"></div>
+            <div id="modalLoading" class="loading">
+                <div class="loading-spinner"></div>
+                <p>Menghapus item...</p>
+            </div>
+            <div class="modal-actions">
+                <button type="button" id="confirmDeleteBtn" class="delete-btn" onclick="confirmDelete()">Hapus</button>
+                <button type="button" class="submit-btn" onclick="closeDeleteModal()">Batal</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        const supabase = window.supabase.createClient(
+            'https://rzhcxyfapjxjbaeirmfy.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6aGN4eWZhcGp4amJhZWlybWZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAzODY5MTksImV4cCI6MjA1NTk2MjkxOX0.cx8dqPrG_BVgn5eFrSx6EiK-IE3B5a84QmNBNAiSKUI'
+        );
+
+        // Fungsi untuk logout
+        async function handleLogout() {
+            try {
+                await supabase.auth.signOut();
+                localStorage.removeItem('supabase.auth.token');
+                localStorage.removeItem('sb-rzhcxyfapjxjbaeirmfy-auth-token');
+                sessionStorage.clear();
+                window.location.href = '../index.html';
+            } catch (error) {
+                console.error('Error saat logout:', error);
+                alert('Gagal logout. Silakan coba lagi.');
+            }
+        }
+
+        // Fungsi untuk memuat galeri
+        async function loadGallery() {
+            const galleryList = document.getElementById('galleryList');
+            try {
+                const { data: gallery, error } = await supabase
+                    .from('gallery')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                
+                galleryList.innerHTML = gallery.map(item => `
+                    <div class="content-item">
+                        <img src="${item.image_url}" alt="${item.title}" class="content-thumbnail">
+                        <div class="content-info">
+                            <div class="content-title">${item.title}</div>
+                            <div class="content-date">${new Date(item.created_at).toLocaleDateString('id-ID')}</div>
+                        </div>
+                        <div class="content-actions">
+                            <button class="edit-btn" onclick="editGalleryItem('${item.id}', '${item.title}', '${item.image_url}')">Edit</button>
+                            <button class="delete-btn" onclick="showDeleteModal(() => deleteGalleryItem('${item.id}', '${item.storage_path}'))">Hapus</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading gallery:', error);
+                galleryList.innerHTML = '<div class="error-message">Gagal memuat galeri</div>';
+            }
+        }
+
+        // Fungsi untuk memuat informasi
+        async function loadInfo() {
+            const infoList = document.getElementById('infoList');
+            try {
+                const { data: posts, error } = await supabase
+                    .from('posts')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                
+                infoList.innerHTML = posts.map(post => `
+                    <div class="content-item">
+                        ${post.image_url ? `<img src="${post.image_url}" alt="${post.title}" class="content-thumbnail">` : ''}
+                        <div class="content-info">
+                            <div class="content-title">${post.title}</div>
+                            <div class="content-date">${new Date(post.created_at).toLocaleDateString('id-ID')}</div>
+                        </div>
+                        <div class="content-actions">
+                            <button class="edit-btn" onclick="editInfoItem('${post.id}', '${post.title}', '${post.content}', '${post.image_url || ''}')">Edit</button>
+                            <button class="delete-btn" onclick="showDeleteModal(() => deletePost('${post.id}'))">Hapus</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading info:', error);
+                infoList.innerHTML = '<div class="error-message">Gagal memuat informasi</div>';
+            }
+        }
+
+        // Inisialisasi halaman
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                // Periksa sesi terlebih dahulu
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) {
+                    window.location.replace('../index.html');
+                    return;
+                }
+                
+                // Set pesan selamat datang
+                if (session?.user?.email) {
+                    document.getElementById('welcomeMessage').textContent = 
+                        `Selamat datang, ${session.user.email}`;
+                }
+
+                // Load content
+                await Promise.all([loadGallery(), loadInfo()]);
+            } catch (error) {
+                console.error('Initialization error:', error);
+                window.location.replace('../index.html');
+            }
+            window.lucide.createIcons();
+
+            // Menu mobile
+            const navToggle = document.querySelector('.nav-toggle');
+            const navLinks = document.querySelector('.nav-links');
+            
+            navToggle.addEventListener('click', function() {
+                navLinks.classList.toggle('active');
+            });
+
+            document.addEventListener('click', function(event) {
+                if (!event.target.closest('.navbar')) {
+                    navLinks.classList.remove('active');
+                }
+            });
+        });
+
+        // Membuat fungsi logout tersedia secara global
+        window.handleLogout = handleLogout;
+    </script>
+</body>
+</html>

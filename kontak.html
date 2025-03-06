@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kontak - MI Nurul Islam</title>
+    <link rel="stylesheet" href="src\css\style.css">
+    <style>
+        /* Style untuk Modal Login */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #666;
+            cursor: pointer;
+            padding: 0.5rem;
+            line-height: 1;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(22, 101, 52, 0.1);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .wrapper {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .content-container {
+            flex: 1;
+            padding: 2rem 5%;
+            margin-top: 72px;
+        }
+
+        .page-title {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .contact-card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .contact-card h2 {
+            color: var(--primary-color);
+            font-size: 1.75rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .contact-info {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .contact-item {
+            display: flex;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .contact-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .icon {
+            color: var(--primary-color);
+            background: #e6f4ea;
+            padding: 1rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .contact-details h3 {
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .contact-details p {
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .contact-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            width: 100%;
+        }
+
+        .contact-link:hover .contact-details p {
+            color: var(--primary-color);
+        }
+
+        .map-container {
+            margin-top: 2rem;
+            border-radius: 12px;
+            overflow: hidden;
+            height: 400px;
+        }
+
+        .map-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Style Footer yang Diperbaiki */
+        .footer {
+            background: var(--primary-color);
+            color: var(--white);
+            padding: 3rem 0;
+            margin-top: auto;
+        }
+    
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+    
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 3rem;
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+    
+        .footer-section {
+            padding: 0 1rem;
+        }
+    
+        .footer-section h3 {
+            color: #BBF7D0;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding-bottom: 0.75rem;
+        }
+    
+        .footer-section h3::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 60px;
+            height: 3px;
+            background: #BBF7D0;
+        }
+    
+        .footer-section p,
+        .footer-section a {
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.8;
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+        }
+    
+        .footer-section a {
+            display: block;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+    
+        .footer-section a:hover {
+            color: #BBF7D0;
+            padding-left: 5px;
+        }
+    
+        /* Style untuk Jam Operasional */
+        .operating-hours {
+            display: grid;
+            gap: 0.75rem;
+        }
+    
+        .hours-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    
+        .hours-item:last-child {
+            border-bottom: none;
+        }
+    
+        .hours-day {
+            font-weight: 500;
+            min-width: 130px;
+        }
+    
+        .hours-time {
+            color: rgba(255, 255, 255, 0.9);
+        }
+    
+        .hours-closed {
+            color: #FCA5A5;
+            font-weight: 500;
+        }
+    
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    
+        .footer-bottom p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+        }
+    
+        .footer-bottom a {
+            color: #BBF7D0;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+    
+        .footer-bottom a:hover {
+            color: white;
+        }
+    
+        /* Responsif untuk Tablet */
+        @media (max-width: 992px) {
+            .footer-grid {
+                gap: 2rem;
+            }
+        }
+    
+        /* Responsif untuk Mobile */
+        @media (max-width: 768px) {
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+    
+            .footer-section {
+                text-align: center;
+                padding: 0;
+            }
+    
+            .footer-section h3::after {
+                left: 50%;
+                transform: translateX(-50%);
+            }
+    
+            .hours-item {
+                flex-direction: column;
+                gap: 0.5rem;
+                text-align: center;
+            }
+    
+            .hours-day {
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <nav class="navbar">
+            <div class="nav-brand">
+                <img src="src\img\logo.jpg" alt="Logo MI Nurul Islam" class="logo">
+                <span>MI Nurul Islam</span>
+            </div>
+            <button class="nav-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <div class="nav-links">
+                <a href="index.html">Beranda</a>
+                <a href="tentang.html">Tentang Sekolah</a>
+                <a href="galeri.html">Galeri</a>
+                <a href="pengajar.html">Profil Pengajar</a>
+                <a href="informasi.html">Informasi</a>
+                <a href="kontak.html" class="active">Kontak</a>
+                <button onclick="showLoginModal()" class="login-btn">Login</button>
+            </div>
+        </nav>
+
+        <main class="content-container">
+            <div class="page-title">
+                <h1>Hubungi Kami</h1>
+                <p>Silakan hubungi kami untuk informasi lebih lanjut</p>
+            </div>
+            
+            <div class="contact-card">
+                <div class="contact-info">
+                    <a href="mailto:misnurulislampondokkresek@gmail.com" class="contact-link">
+                        <div class="contact-item">
+                            <div class="icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                            </div>
+                            <div class="contact-details">
+                                <h3>Email</h3>
+                                <p>misnurulislampondokkresek@gmail.com</p>
+                            </div>
+                        </div>
+                    </a>
+
+                    <a href="tel:+6281371296595" class="contact-link">
+                        <div class="contact-item">
+                            <div class="icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                            </div>
+                            <div class="contact-details">
+                                <h3>Telepon</h3>
+                                <p>+62 813 7129 6595</p>
+                            </div>
+                        </div>
+                    </a>
+
+                    <div class="contact-item">
+                        <div class="icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                        </div>
+                        <div class="contact-details">
+                            <h3>Alamat</h3>
+                            <p>SIMPANG ACONG RT 01 RW 02 DUSUN II PONDOK KRESEK, SIARANG ARANG, 
+                                Kec. Pujud, Kab. Rokan Hilir, Riau</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="map-container">
+                    <iframe 
+                        src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d498.9766228848611!2d100.45718431475019!3d1.5725321281692272!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e1!3m2!1sen!2sid!4v1710843147854!5m2!1sen!2sid"
+                        width="100%" 
+                        height="100%" 
+                        style="border:0;" 
+                        allowfullscreen="" 
+                        loading="lazy" 
+                        referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </div>
+            </div>
+        </main>
+
+        
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h3>Alamat</h3>
+                    <p>SIMPANG ACONG RT 01 RW 02 DUSUN II PONDOK KRESEK, SIARANG ARANG, Kec. Pujud, Kab. Rokan Hilir, Riau</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Kontak</h3>
+                    <a href="tel:+6281371296595">Telepon: +62 813 7129 6595</a>
+                    <a href="mailto:misnurulislampondokkresek@gmail.com">Email: misnurulislampondokkresek@gmail.com</a>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Jam Operasional</h3>
+                    <p>Senin - Kamis: 07:30 - 12:00 WIB</p>
+                    <p>Jumat: 07:30 - 11:00 WIB</p>
+                    <p>Sabtu: 07:30 - 11:00 WIB</p>
+                    <p>Minggu: Libur</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 MI Nurul Islam. Hak Cipta Dilindungi.
+                    - Dibuat oleh: <a href="https://www.instagram.com/srirezekysetiani_05?igsh=cGJ6Ymx5czZvbWl2&utm_source=qr" target="_blank">Sri Rezeki Setiani</a>
+                </p>
+            </div>
+        </div>
+    </footer>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Login Admin</h2>
+                <button onclick="closeLoginModal()" class="close-btn">&times;</button>
+            </div>
+            
+            <div id="errorMessage" class="error-message"></div>
+            
+            <div id="loading" class="loading">
+                <div class="loading-spinner"></div>
+                <p>Memproses...</p>
+            </div>
+
+            <form id="loginForm" onsubmit="handleLogin(event); return false;">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        required 
+                        autocomplete="email"
+                        placeholder="Masukkan email admin"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        required 
+                        autocomplete="current-password"
+                        placeholder="Masukkan password"
+                    >
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    Login
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script>
+        const supabase = window.supabase.createClient(
+            'https://rzhcxyfapjxjbaeirmfy.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6aGN4eWZhcGp4amJhZWlybWZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAzODY5MTksImV4cCI6MjA1NTk2MjkxOX0.cx8dqPrG_BVgn5eFrSx6EiK-IE3B5a84QmNBNAiSKUI'
+        );
+
+        function showLoginModal() {
+            document.getElementById('loginModal').style.display = 'flex';
+            document.getElementById('email').focus();
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').style.display = 'none';
+            document.getElementById('loginForm').reset();
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const submitBtn = document.getElementById('submitBtn');
+            const errorMessage = document.getElementById('errorMessage');
+            const loading = document.getElementById('loading');
+
+            errorMessage.style.display = 'none';
+            loading.style.display = 'block';
+            submitBtn.disabled = true;
+
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password
+                });
+
+                if (error) {
+                    throw error;
+                }
+
+                if (data?.user) {
+                    window.location.href = 'admin/dashboard.html';
+                }
+            } catch (error) {
+                let errorMsg = 'Login gagal. ';
+                if (error.message.includes('Invalid login credentials')) {
+                    errorMsg += 'Email atau password salah.';
+                } else {
+                    errorMsg += error.message;
+                }
+                errorMessage.textContent = errorMsg;
+                errorMessage.style.display = 'block';
+            } finally {
+                loading.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+            return false;
+        }
+
+        // Tutup modal saat klik di luar
+        window.onclick = function(event) {
+            const modal = document.getElementById('loginModal');
+            if (event.target === modal) {
+                closeLoginModal();
+            }
+        }
+
+        // Tutup modal dengan tombol Escape
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeLoginModal();
+            }
+        });
+
+        // Cek jika sudah login
+        document.addEventListener('DOMContentLoaded', async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                window.location.href = 'admin/dashboard.html';
+            }
+
+            // Inisialisasi menu mobile
+            const navToggle = document.querySelector('.nav-toggle');
+            const navLinks = document.querySelector('.nav-links');
+            
+            navToggle.addEventListener('click', function() {
+                navLinks.classList.toggle('active');
+            });
+
+            document.addEventListener('click', function(event) {
+                if (!event.target.closest('.navbar')) {
+                    navLinks.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

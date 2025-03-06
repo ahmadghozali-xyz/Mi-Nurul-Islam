@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MI Nurul Islam</title>
+    <link rel="stylesheet" href="src/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <img src="src/img/logo.jpg" alt="Logo MI Nurul Islam" class="logo">
+            <span>MI Nurul Islam</span>
+        </div>
+        <button class="nav-toggle" aria-label="Toggle navigation">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="nav-links">
+            <a href="index.html" class="active">Beranda</a>
+            <a href="tentang.html">Tentang Sekolah</a>
+            <a href="galeri.html">Galeri</a>
+            <a href="pengajar.html">Profil Pengajar</a>
+            <a href="informasi.html">Informasi</a>
+            <a href="kontak.html">Kontak</a>
+            <button onclick="showLoginModal()" class="login-btn">Login</button>
+        </div>
+    </nav>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Login Admin</h2>
+                <button onclick="closeLoginModal()" class="close-btn">&times;</button>
+            </div>
+            
+            <div id="errorMessage" class="error-message"></div>
+            
+            <div id="loading" class="loading">
+                <div class="loading-spinner"></div>
+                <p>Memproses...</p>
+            </div>
+
+            <form id="loginForm" onsubmit="handleLogin(event); return false;">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        required 
+                        autocomplete="email"
+                        placeholder="Masukkan email admin"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        required 
+                        autocomplete="current-password"
+                        placeholder="Masukkan password"
+                    >
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    Login
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #666;
+            cursor: pointer;
+            padding: 0.5rem;
+            line-height: 1;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(22, 101, 52, 0.1);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script>
+        const supabase = window.supabase.createClient(
+            'https://rzhcxyfapjxjbaeirmfy.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6aGN4eWZhcGp4amJhZWlybWZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAzODY5MTksImV4cCI6MjA1NTk2MjkxOX0.cx8dqPrG_BVgn5eFrSx6EiK-IE3B5a84QmNBNAiSKUI'
+        );
+
+        function showLoginModal() {
+            document.getElementById('loginModal').style.display = 'flex';
+            document.getElementById('email').focus();
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').style.display = 'none';
+            document.getElementById('loginForm').reset();
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const submitBtn = document.getElementById('submitBtn');
+            const errorMessage = document.getElementById('errorMessage');
+            const loading = document.getElementById('loading');
+
+            errorMessage.style.display = 'none';
+            loading.style.display = 'block';
+            submitBtn.disabled = true;
+
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password
+                });
+
+                if (error) {
+                    throw error;
+                }
+
+                if (data?.user) {
+                    window.location.href = 'admin/dashboard.html';
+                }
+            } catch (error) {
+                let errorMsg = 'Login gagal. ';
+                if (error.message.includes('Invalid login credentials')) {
+                    errorMsg += 'Email atau password salah.';
+                } else {
+                    errorMsg += error.message;
+                }
+                errorMessage.textContent = errorMsg;
+                errorMessage.style.display = 'block';
+            } finally {
+                loading.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+            return false;
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('loginModal');
+            if (event.target === modal) {
+                closeLoginModal();
+            }
+        }
+
+        // Close modal on escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeLoginModal();
+            }
+        });
+
+        // Check if already logged in
+        document.addEventListener('DOMContentLoaded', async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            
+            // Jika ada sesi dan mencoba akses halaman admin
+            if (session && window.location.pathname.includes('/admin/')) {
+                return; // Biarkan akses ke halaman admin
+            }
+            
+            // Jika tidak ada sesi tapi mencoba akses halaman admin
+            if (!session && window.location.pathname.includes('/admin/')) {
+                window.location.replace('../index.html');
+            }
+        });
+    </script>
+
+    <main>
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Madrasah Ibtidaiyah Nurul Islam</h1>
+                <p>
+                    Madrasah Ibtidaiyah Nurul Islam adalah madrasah untuk membentuk anak berakhlak mulia dan berilmu pengetahuan yg memiliki ilmu pengetahuan dunia dan akhirat, Serta membentuk anak untuk memiliki keterampilan yg mandiri dan mencintai Al-Qur'an dengan menghapalkannya dan mengamalkannya dalam kehidupan sehari hari
+                </p>
+            </div>
+        </section>
+
+        <section class="features">
+            <div class="feature-card">
+                <h3>Visi</h3>
+                <p>Mewujudkan warga sekolah yang Terampil, Berperilaku, Berakhlak, serta Beriman dan Bertakwa kepada Allah SWT.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Misi</h3>
+                <p>Untuk menciptakan manusia yang peduli terhadap ilmu agama dalam rangka mengembangkan sumber daya manusia yang berkualitas, aktif, kreatif, dan memiliki iman dan takwa.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Sejarah</h3>
+                <p>MI Nurul Islam Pondok Kresek mulai beroperasi pada 17 Juli 1997 dan hingga kini aktif dalam proses belajar mengajar untuk mencerdaskan anak bangsa secara intelektual dan spiritual. Meskipun menghadapi banyak tantangan, sekolah terus berbenah dan memberikan pelayanan maksimal kepada siswa. Dukungan dari pemerintah, masyarakat, dan orang tua murid sangat membantu keberlangsungan sekolah melalui berbagai kegiatan dan bantuan.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h3>Alamat</h3>
+                    <p>SIMPANG ACONG RT 01 RW 02 DUSUN II PONDOK KRESEK, SIARANG ARANG, Kec. Pujud, Kab. Rokan Hilir, Riau</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Kontak</h3>
+                    <a href="tel:+6281371296595">Telepon: +62 813 7129 6595</a>
+                    <a href="mailto:misnurulislampondokkresek@gmail.com"> <p>Email: misnurulislampondokkresek@gmail.com </p> </a>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Jam Operasional</h3>
+                    <p>Senin - Kamis: 07:30 - 12:00 WIB</p>
+                    <p>Jumat: 07:30 - 11:00 WIB</p>
+                    <p>Sabtu: 07:30 - 11:00 WIB</p>
+                    <p>Minggu: Libur</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 MI Nurul Islam. Hak Cipta Dilindungi.
+                    - Dibuat oleh: <a href="https://www.instagram.com/srirezekysetiani_05?igsh=cGJ6Ymx5czZvbWl2&utm_source=qr" target="_blank">Sri Rezeki Setiani</a>
+                </p>
+            </div>
+        </div>
+    </footer>
+    </div>
+
+   >
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navToggle = document.querySelector('.nav-toggle');
+            const navLinks = document.querySelector('.nav-links');
+            
+            function toggleMenu() {
+                navToggle.classList.toggle('active');
+                navLinks.classList.toggle('active');
+                document.body.classList.toggle('menu-open');
+            }
+
+            navToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                toggleMenu();
+            });
+
+            // Menutup menu saat mengklik di luar navbar
+            document.addEventListener('click', function(e) {
+                if (navLinks.classList.contains('active') && !e.target.closest('.navbar')) {
+                    toggleMenu();
+                }
+            });
+
+            // Menutup menu saat mengklik link
+            navLinks.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    if (navLinks.classList.contains('active')) {
+                        toggleMenu();
+                    }
+                });
+            });
+
+            // Menutup menu saat menekan tombol Escape
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && navLinks.classList.contains('active')) {
+                    toggleMenu();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

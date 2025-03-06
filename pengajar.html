@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Pengajar - MI Nurul Islam</title>
+    <link rel="stylesheet" href="src\css\style.css">
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        /* Style untuk Modal Login */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #666;
+            cursor: pointer;
+            padding: 0.5rem;
+            line-height: 1;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(22, 101, 52, 0.1);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Style yang sudah ada tetap dipertahankan */
+        .content-container {
+            padding: 2rem 5%;
+            margin-top: 72px;
+            min-height: calc(100vh - 72px - 400px);
+        }
+
+        .page-title {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .struktur-organisasi {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .org-section {
+            margin-bottom: 4rem;
+        }
+
+        .org-title {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+            font-size: 1.5rem;
+            position: relative;
+            padding-bottom: 1rem;
+        }
+
+        .org-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: var(--primary-color);
+        }
+
+        .org-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            justify-items: center;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .org-card {
+            background: var(--white);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 300px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .org-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(22, 101, 52, 0.15);
+            border-color: var(--primary-color);
+        }
+
+        .org-info {
+            padding: 1.5rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .org-name {
+            font-size: 1.25rem;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .org-position {
+            color: var(--primary-color);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .org-detail {
+            color: #666;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <img src="src/img/logo.jpg" alt="Logo MI Nurul Islam" class="logo">
+            <span>MI Nurul Islam</span>
+        </div>
+        <button class="nav-toggle">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="nav-links">
+            <a href="index.html">Beranda</a>
+            <a href="tentang.html">Tentang Sekolah</a>
+            <a href="galeri.html">Galeri</a>
+            <a href="pengajar.html" class="active">Profil Pengajar</a>
+            <a href="informasi.html">Informasi</a>
+            <a href="kontak.html">Kontak</a>
+            <button onclick="showLoginModal()" class="login-btn">Login</button>
+        </div>
+    </nav>
+
+    <!-- Modal Login -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Login Admin</h2>
+                <button onclick="closeLoginModal()" class="close-btn">&times;</button>
+            </div>
+            
+            <div id="errorMessage" class="error-message"></div>
+            
+            <div id="loading" class="loading">
+                <div class="loading-spinner"></div>
+                <p>Memproses...</p>
+            </div>
+
+            <form id="loginForm" onsubmit="handleLogin(event); return false;">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        required 
+                        autocomplete="email"
+                        placeholder="Masukkan email admin"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        required 
+                        autocomplete="current-password"
+                        placeholder="Masukkan password"
+                    >
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    Login
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <main class="content-container">
+        <div class="page-title">
+            <h1>Struktur Organisasi</h1>
+            <p>MI Nurul Islam</p>
+        </div>
+
+        <div class="struktur-organisasi">
+            <!-- Yayasan -->
+            <section class="org-section">
+                <h2 class="org-title">Yayasan</h2>
+                <div class="org-grid">
+                    <div class="org-card">
+                        <div class="org-info">
+                            <h3 class="org-name">Suratno</h3>
+                            <div class="org-position">Ketua Yayasan</div>
+                            <p class="org-detail">Yayasan Nurul Islam</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Kepala Sekolah -->
+            <section class="org-section">
+                <h2 class="org-title">Kepala Sekolah</h2>
+                <div class="org-grid">
+                    <div class="org-card">
+                        <div class="org-info">
+                            <h3 class="org-name">Erlina.,S.Ag</h3>
+                            <div class="org-position">Kepala Sekolah</div>
+                            <p class="org-detail">Periode 1997 - Sekarang</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Bendahara -->
+            <section class="org-section">
+                <h2 class="org-title">Bendahara</h2>
+                <div class="org-grid">
+                    <div class="org-card">
+                        <div class="org-info">
+                            <h3 class="org-name">Sudarto.,S.Pd</h3>
+                            <div class="org-position">Bendahara Sekolah</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Wali Kelas -->
+            <section class="org-section">
+                <h2 class="org-title">Wali Kelas</h2>
+                <div class="org-grid">
+                    <!-- Wali Kelas 1 -->
+                    <div class="org-card">
+                        <div class="org-info">
+                            <h3 class="org-name">Retta Hutagaol.,S.Pd</h3>
+                            <div class="org-position">Wali Kelas 1</div>
+                        </div>
+                    </div>
+
+                    <!-- Wali Kelas 2 -->
+                    <div class="org-card">
+                        <div class="org-info">
+                            <h3 class="org-name">Saidatun Amaliah</h3>
+                            <div class="org-position">Wali Kelas 2</div>
+                        </div>
+                    </div>
+
+                    <!-- Wali Kelas 3 -->
+                    <div class="org-card">
+                        <div class="org-info">
+                            <h3 class="org-name">Farida Hanum Hasibuan</h3>
+                            <div class="org-position">Wali Kelas 3</div>
+                        </div>
+                    </div>
+
+                    <!-- Wali Kelas 4 -->
+                    <div class="org-card">
+                        <div class="org-info">
+                            <h3 class="org-name">Eni Puji Astuti.,S.E</h3>
+                            <div class="org-position">Wali Kelas 4</div>
+                        </div>
+                    </div>
+
+                    <!-- Wali Kelas 5 -->
+                    <div class="org-card">
+                        <div class="org-info">
+                            <h3 class="org-name">Wiwik Sahtiah Sari.,S.Pd</h3>
+                            <div class="org-position">Wali Kelas 5</div>
+                        </div>
+                    </div>
+
+                    <!-- Wali Kelas 6 -->
+                    <div class="org-card">
+                        <div class="org-info">
+                            <h3 class="org-name">Lusianawati</h3>
+                            <div class="org-position">Wali Kelas 6</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Guru Tahfidz -->
+            <section class="org-section">
+                <h2 class="org-title">Guru Tahfidz</h2>
+                <div class="org-grid">
+                    <div class="org-card">
+                        <div class="org-info">
+                            <h3 class="org-name">Ahmad Zaky Siagian.,S.H.</h3>
+                            <div class="org-position">Guru Tahfidz</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Informasi Pendidikan -->
+            <section class="org-section">
+                <h2 class="org-title">Informasi Pendidikan</h2>
+                <div class="table-container">
+                    <table class="education-table">
+                        <thead>
+                            <tr>
+                                <th>Nama</th>
+                                <th>Jabatan</th>
+                                <th>Pendidikan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Erlina, S.Ag</td>
+                                <td>Kepala Sekolah</td>
+                                <td>Alumni AIN Fakultas Syariah Sumatera Utara</td>
+                            </tr>
+                            <tr>
+                                <td>Sudarto, S.Pd</td>
+                                <td>Bendahara</td>
+                                <td>Alumni UNRI Fakultas Keguruan</td>
+                            </tr>
+                            <tr>
+                                <td>Wiwik Sahtiah Sari, S.Pd</td>
+                                <td>Wali Kelas 5</td>
+                                <td>Alumni Fakultas Keguruan UT</td>
+                            </tr>
+                            <tr>
+                                <td>Retta Hutagaol, S.Pd</td>
+                                <td>Wali Kelas 1</td>
+                                <td>Alumni Fakultas Keguruan UT</td>
+                            </tr>
+                            <tr>
+                                <td>Ahmad Zaky Siagian, S.H</td>
+                                <td>Guru Tahfidz</td>
+                                <td>Alumni UINSU Fakultas Syariah</td>
+                            </tr>
+                            <tr>
+                                <td>Eni Puji Astuti, S.E</td>
+                                <td>Wali Kelas 4</td>
+                                <td>Alumni AIR Fakultas Ekonomi</td>
+                            </tr>
+                            <tr>
+                                <td>Saidatin Amaliah</td>
+                                <td>Wali Kelas 2</td>
+                                <td>Alumni Madrasah Aliyah Pinang Lombang</td>
+                            </tr>
+                            <tr>
+                                <td>Faridah Hanum</td>
+                                <td>Wali Kelas 3</td>
+                                <td>Alumni Madrasah Aliyah An-Nur Bagan Bate</td>
+                            </tr>
+                            <tr>
+                                <td>Lusianawati</td>
+                                <td>Wali Kelas 6</td>
+                                <td>Alumni SMK AL-Mujahidin</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h3>Alamat</h3>
+                    <p>SIMPANG ACONG RT 01 RW 02 DUSUN II PONDOK KRESEK, SIARANG ARANG, Kec. Pujud, Kab. Rokan Hilir, Riau</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Kontak</h3>
+                    <a href="tel:+6281371296595">Telepon: +62 813 7129 6595</a>
+                    <a href="mailto:misnurulislampondokkresek@gmail.com">Email: misnurulislampondokkresek@gmail.com</a>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Jam Operasional</h3>
+                    <p>Senin - Kamis: 07:30 - 12:00 WIB</p>
+                    <p>Jumat: 07:30 - 11:00 WIB</p>
+                    <p>Sabtu: 07:30 - 11:00 WIB</p>
+                    <p>Minggu: Libur</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 MI Nurul Islam. Hak Cipta Dilindungi.
+                    - Dibuat oleh: <a href="https://www.instagram.com/srirezekysetiani_05?igsh=cGJ6Ymx5czZvbWl2&utm_source=qr" target="_blank">Sri Rezeki Setiani</a>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const supabase = window.supabase.createClient(
+            'https://rzhcxyfapjxjbaeirmfy.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6aGN4eWZhcGp4amJhZWlybWZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAzODY5MTksImV4cCI6MjA1NTk2MjkxOX0.cx8dqPrG_BVgn5eFrSx6EiK-IE3B5a84QmNBNAiSKUI'
+        );
+
+        // Fungsi untuk menangani menu mobile
+        function initMobileMenu() {
+            const navToggle = document.querySelector('.nav-toggle');
+            const navLinks = document.querySelector('.nav-links');
+            
+            if (navToggle && navLinks) {
+                navToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    navLinks.classList.toggle('active');
+                });
+
+                // Tutup menu saat klik di luar
+                document.addEventListener('click', function(e) {
+                    if (!e.target.closest('.navbar') && navLinks.classList.contains('active')) {
+                        navLinks.classList.remove('active');
+                    }
+                });
+
+                // Tutup menu saat klik link
+                navLinks.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        navLinks.classList.remove('active');
+                    });
+                });
+            }
+        }
+
+        function showLoginModal() {
+            document.getElementById('loginModal').style.display = 'flex';
+            document.getElementById('email').focus();
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').style.display = 'none';
+            document.getElementById('loginForm').reset();
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const submitBtn = document.getElementById('submitBtn');
+            const errorMessage = document.getElementById('errorMessage');
+            const loading = document.getElementById('loading');
+
+            errorMessage.style.display = 'none';
+            loading.style.display = 'block';
+            submitBtn.disabled = true;
+
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password
+                });
+
+                if (error) {
+                    throw error;
+                }
+
+                if (data?.user) {
+                    window.location.href = 'admin/dashboard.html';
+                }
+            } catch (error) {
+                let errorMsg = 'Login gagal. ';
+                if (error.message.includes('Invalid login credentials')) {
+                    errorMsg += 'Email atau password salah.';
+                } else {
+                    errorMsg += error.message;
+                }
+                errorMessage.textContent = errorMsg;
+                errorMessage.style.display = 'block';
+            } finally {
+                loading.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+            return false;
+        }
+
+        // Tutup modal saat klik di luar
+        window.onclick = function(event) {
+            const modal = document.getElementById('loginModal');
+            if (event.target === modal) {
+                closeLoginModal();
+            }
+        }
+
+        // Tutup modal dengan tombol Escape
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeLoginModal();
+            }
+        });
+
+        // Cek jika sudah login
+        document.addEventListener('DOMContentLoaded', async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                window.location.href = 'admin/dashboard.html';
+            }
+            
+            // Inisialisasi menu mobile
+            initMobileMenu();
+        });
+    </script>
+    <style>
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+
+        .education-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0 auto;
+            background: white;
+            font-size: 0.95rem;
+        }
+
+        .education-table th,
+        .education-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .education-table th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+        }
+
+        .education-table th:first-child {
+            border-top-left-radius: 8px;
+        }
+
+        .education-table th:last-child {
+            border-top-right-radius: 8px;
+        }
+
+        .education-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .education-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .education-table td:first-child {
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+
+        @media (max-width: 768px) {
+            .table-container {
+                padding: 1rem;
+                margin: 0 -1rem;
+                border-radius: 0;
+            }
+
+            .education-table {
+                font-size: 0.875rem;
+            }
+
+            .education-table th,
+            .education-table td {
+                padding: 0.75rem;
+            }
+        }
+    </style>
+</body>
+</html>

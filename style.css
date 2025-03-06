@@ -1,0 +1,85 @@
+/* File CSS yang ada tetap sama, tambahkan kode berikut setelah class .hero */
+
+.tentang {
+    height: 500px;
+    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+                url('https://images.unsplash.com/photo-1546410531-bb4caa6b424d?auto=format&fit=crop&w=1920&q=80');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--white);
+    padding: 0 1rem;
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition-smooth);
+}
+
+.tentang::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        135deg,
+        rgba(22, 101, 52, 0.8) 0%,
+        rgba(21, 128, 61, 0.8) 100%
+    );
+    opacity: 0;
+    transition: var(--transition-smooth);
+}
+
+.tentang:hover::before {
+    opacity: 1;
+}
+
+.galeri {
+    height: 500px;
+    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+                url('https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=1920&q=80');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--white);
+    padding: 0 1rem;
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition-smooth);
+}
+
+.galeri::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        45deg,
+        rgba(22, 101, 52, 0.8) 0%,
+        rgba(21, 128, 61, 0.8) 100%
+    );
+    opacity: 0;
+    transition: var(--transition-smooth);
+}
+
+.galeri:hover::before {
+    opacity: 1;
+}
+
+/* Tambahkan animasi untuk konten di dalam .tentang dan .galeri */
+.tentang .hero-content,
+.galeri .hero-content {
+    position: relative;
+    z-index: 1;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 1s forwards;
+}

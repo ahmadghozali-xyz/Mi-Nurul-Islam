@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informasi - MI Nurul Islam</title>
+    <link rel="stylesheet" href="src/css/style.css">
+    <script src="https://unpkg.com/@supabase/supabase-js"></script>
+    <style>
+        .content-container {
+            padding: 2rem 5%;
+            margin-top: 72px;
+        }
+
+        .page-title {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .posts-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            padding: 2rem 0;
+        }
+
+        .post-card {
+            background: var(--white);
+            border-radius: 12px;
+            overflow: hidden; 
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .post-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-color);
+        }
+
+        .post-image {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            background: #f3f4f6;
+        }
+
+        .post-content {
+            padding: 1.5rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .post-category {
+            background: var(--light-bg);
+            color: var(--primary-color);
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        .post-title {
+            color: var(--primary-color);
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .post-meta {
+            color: #666;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+        }
+
+        .post-text {
+            line-height: 1.8;
+            color: var(--text-color);
+            font-size: 0.95rem;
+        }
+
+        .no-posts {
+            text-align: center;
+            padding: 3rem;
+            background: var(--white);
+            border-radius: 12px;
+            color: #666;
+            grid-column: 1 / -1;
+        }
+
+        .error-message {
+            text-align: center;
+            padding: 2rem;
+            background: var(--white);
+            border-radius: 12px;
+            margin: 2rem auto;
+            max-width: 600px;
+            grid-column: 1 / -1;
+        }
+
+        .error-message h3 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .error-message p {
+            color: #666;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #666;
+            cursor: pointer;
+            padding: 0.5rem;
+            line-height: 1;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(22, 101, 52, 0.1);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .posts-container {
+                grid-template-columns: 1fr;
+                padding: 1rem 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <img src="src/img/logo.jpg" alt="Logo MI Nurul Islam" class="logo">
+            <span>MI Nurul Islam</span>
+        </div>
+        <button class="nav-toggle">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="nav-links">
+            <a href="index.html">Beranda</a>
+            <a href="tentang.html">Tentang Sekolah</a>
+            <a href="galeri.html">Galeri</a>
+            <a href="pengajar.html">Profil Pengajar</a>
+            <a href="informasi.html" class="active">Informasi</a>
+            <a href="kontak.html">Kontak</a>
+            <button onclick="showLoginModal()" class="login-btn">Login</button>
+        </div>
+    </nav>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Login Admin</h2>
+                <button onclick="closeLoginModal()" class="close-btn">&times;</button>
+            </div>
+            
+            <div id="errorMessage" class="error-message"></div>
+            
+            <div id="loading" class="loading">
+                <div class="loading-spinner"></div>
+                <p>Memproses...</p>
+            </div>
+
+            <form id="loginForm" onsubmit="handleLogin(event); return false;">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        required 
+                        autocomplete="email"
+                        placeholder="Masukkan email admin"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        required 
+                        autocomplete="current-password"
+                        placeholder="Masukkan password"
+                    >
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    Login
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <main class="content-container">
+        <div class="page-title">
+            <h1>Informasi dan Pengumuman</h1>
+            <p>Berita terbaru dan pengumuman penting dari MI Nurul Islam</p>
+        </div>
+
+        <div class="posts-container" id="postsContainer">
+            <!-- Posts will be loaded here -->
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h3>Alamat</h3>
+                    <p>SIMPANG ACONG RT 01 RW 02 DUSUN II PONDOK KRESEK, SIARANG ARANG, Kec. Pujud, Kab. Rokan Hilir, Riau</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Kontak</h3>
+                    <a href="tel:+6281371296595">Telepon: +62 813 7129 6595</a>
+                    <a href="mailto:misnurulislampondokkresek@gmail.com">Email: misnurulislampondokkresek@gmail.com</a>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Jam Operasional</h3>
+                    <p>Senin - Kamis: 07:30 - 12:00 WIB</p>
+                    <p>Jumat: 07:30 - 11:00 WIB</p>
+                    <p>Sabtu: 07:30 - 11:00 WIB</p>
+                    <p>Minggu: Libur</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 MI Nurul Islam. Hak Cipta Dilindungi.
+                    - Dibuat oleh: <a href="https://www.instagram.com/srirezekysetiani_05?igsh=cGJ6Ymx5czZvbWl2&utm_source=qr" target="_blank">Sri Rezeki Setiani</a>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const supabase = window.supabase.createClient(
+            'https://rzhcxyfapjxjbaeirmfy.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6aGN4eWZhcGp4amJhZWlybWZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAzODY5MTksImV4cCI6MjA1NTk2MjkxOX0.cx8dqPrG_BVgn5eFrSx6EiK-IE3B5a84QmNBNAiSKUI'
+        );
+
+        // Fungsi untuk menampilkan modal login
+        function showLoginModal() {
+            document.getElementById('loginModal').style.display = 'flex';
+            document.getElementById('email').focus();
+        }
+
+        // Fungsi untuk menutup modal login
+        function closeLoginModal() {
+            document.getElementById('loginModal').style.display = 'none';
+            document.getElementById('loginForm').reset();
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        // Fungsi untuk menangani login
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const submitBtn = document.getElementById('submitBtn');
+            const errorMessage = document.getElementById('errorMessage');
+            const loading = document.getElementById('loading');
+
+            errorMessage.style.display = 'none';
+            loading.style.display = 'block';
+            submitBtn.disabled = true;
+
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password
+                });
+
+                if (error) {
+                    throw error;
+                }
+
+                if (data?.user) {
+                    window.location.href = 'admin/dashboard.html';
+                }
+            } catch (error) {
+                let errorMsg = 'Login gagal. ';
+                if (error.message.includes('Invalid login credentials')) {
+                    errorMsg += 'Email atau password salah.';
+                } else {
+                    errorMsg += error.message;
+                }
+                errorMessage.textContent = errorMsg;
+                errorMessage.style.display = 'block';
+            } finally {
+                loading.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+            return false;
+        }
+
+        // Tutup modal saat klik di luar
+        window.onclick = function(event) {
+            const modal = document.getElementById('loginModal');
+            if (event.target === modal) {
+                closeLoginModal();
+            }
+        }
+
+        // Tutup modal dengan tombol Escape
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeLoginModal();
+            }
+        });
+
+        // Cek jika sudah login
+        document.addEventListener('DOMContentLoaded', async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.user) {
+                window.location.href = 'admin/dashboard.html';
+            }
+
+            // Load posts
+            loadPosts();
+        });
+
+        // Fungsi untuk memformat tanggal
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString('id-ID', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        async function loadPosts() {
+            const postsContainer = document.getElementById('postsContainer');
+            
+            try {
+                const { data: posts, error } = await supabase.from('posts').select('*').order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                if (!posts?.length) {
+                    postsContainer.innerHTML = `
+                        <div class="no-posts">
+                            <h3>Belum ada informasi yang dipublikasikan</h3>
+                            <p>Silakan kembali lagi nanti</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                postsContainer.innerHTML = posts.map(post => `
+                    <article class="post-card">
+                        ${post.image_url ? `
+                            <img 
+                                src="${post.image_url}" 
+                                alt="${post.title}" 
+                                class="post-image"
+                                loading="lazy"
+                                onerror="this.src='src/img/placeholder.jpg';"
+                            >
+                        ` : ''}
+                        <div class="post-content">
+                            <span class="post-category">${post.category}</span>
+                            <h2 class="post-title">${post.title}</h2>
+                            <div class="post-meta">
+                                <span>Dipublikasikan pada: ${formatDate(post.created_at)}</span>
+                            </div>
+                            <div class="post-text">
+                                ${post.content}
+                            </div>
+                        </div>
+                    </article>
+                `).join('');
+
+            } catch (error) {
+                console.error('Error fetching posts:', error);
+                postsContainer.innerHTML = `
+                    <div class="error-message">
+                        <h3>Terjadi kesalahan</h3>
+                        <p>Gagal memuat informasi. Silakan coba lagi nanti.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Menu mobile
+        document.addEventListener('DOMContentLoaded', function() {
+            const navToggle = document.querySelector('.nav-toggle');
+            const navLinks = document.querySelector('.nav-links');
+            
+            navToggle.addEventListener('click', function() {
+                navLinks.classList.toggle('active');
+            });
+            
+
+            document.addEventListener('click', function(event) {
+                if (!event.target.closest('.navbar')) {
+                    navLinks.classList.remove('active');
+                }
+            });
+        });
+        
+        // Membuat fungsi tersedia secara global
+        window.showLoginModal = showLoginModal;
+        window.closeLoginModal = closeLoginModal;
+        window.handleLogin = handleLogin;
+    </script>
+</body>
+</html>

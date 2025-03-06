@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tentang Sekolah - MI Nurul Islam</title>
+    <link rel="stylesheet" href="src\css\style.css">
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #666;
+            cursor: pointer;
+            padding: 0.5rem;
+            line-height: 1;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(22, 101, 52, 0.1);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+    <style>
+        main {
+            margin-top: 72px; /* Sesuaikan dengan tinggi navbar */
+        }
+
+        .sambutan-section {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+                        url('src/img/foto-sekolah-mi.jpg');
+            background-size: cover;
+            background-position: center;
+            padding: 4rem 5%;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+
+        .sambutan-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 3rem;
+            align-items: start;
+        }
+
+        .kepala-sekolah-profile {
+            text-align: center;
+            transition: all 0.4s ease;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 12px;
+            height: fit-content;
+        }
+
+        .kepala-sekolah-profile:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .kepala-sekolah-img {
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 1rem;
+            border: 4px solid var(--white);
+            transition: all 0.4s ease;
+        }
+
+        .kepala-sekolah-name {
+            color: var(--white);
+            font-size: 1.5rem;
+            margin: 0.5rem 0;
+            font-weight: 600;
+        }
+
+        .kepala-sekolah-title {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .sambutan-content {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 12px;
+            position: relative;
+            transition: all 0.4s ease;
+            color: white;
+        }
+
+        .sambutan-content:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .sambutan-title {
+            color: var(--white);
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .sambutan-text {
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.8;
+            text-align: justify;
+            margin-bottom: 1.5rem;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            padding: 4rem 5%;
+            background: var(--light-bg);
+        }
+
+        .feature-card {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--gradient-primary);
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 24px rgba(22, 101, 52, 0.15);
+        }
+
+        .feature-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .feature-card h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        .feature-card h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        .feature-card:hover h3::after {
+            width: 100px;
+        }
+
+        .feature-card p {
+            color: var(--text-color);
+            line-height: 1.7;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover p {
+            color: var(--text-dark);
+        }
+
+        @media (max-width: 1024px) {
+            .sambutan-container {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .kepala-sekolah-profile {
+                margin: 0 auto;
+                max-width: 300px;
+            }
+
+            .features {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sambutan-section {
+                padding: 2rem 5%;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+
+            .sambutan-content {
+                padding: 1.5rem;
+            }
+
+            .sambutan-title {
+                font-size: 1.5rem;
+            }
+        }
+
+        .feature-card {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInCard 0.6s forwards;
+        }
+
+        @keyframes fadeInCard {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .features .feature-card:nth-child(1) { animation-delay: 0.1s; }
+        .features .feature-card:nth-child(2) { animation-delay: 0.2s; }
+        .features .feature-card:nth-child(3) { animation-delay: 0.3s; }
+        .features .feature-card:nth-child(4) { animation-delay: 0.4s; }
+        .features .feature-card:nth-child(5) { animation-delay: 0.5s; }
+        .features .feature-card:nth-child(6) { animation-delay: 0.6s; }
+        .features .feature-card:nth-child(7) { animation-delay: 0.7s; }
+        .features .feature-card:nth-child(8) { animation-delay: 0.8s; }
+        .features .feature-card:nth-child(9) { animation-delay: 0.9s; }
+    </style>
+</head>
+<body>
+    <!-- Sisanya tetap sama seperti sebelumnya -->
+    <!-- Hanya menghapus section .tentang yang kosong -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <img src="src\img\logo.jpg" alt="Logo MI Nurul Islam" class="logo">
+            <span>MI Nurul Islam</span>
+        </div>
+        <button class="nav-toggle">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="nav-links">
+            <a href="index.html">Beranda</a>
+            <a href="tentang.html" class="active">Tentang Sekolah</a>
+            <a href="galeri.html">Galeri</a>
+            <a href="pengajar.html">Profil Pengajar</a>
+            <a href="informasi.html">Informasi</a>
+            <a href="kontak.html">Kontak</a>
+            <button onclick="showLoginModal()" class="login-btn">Login</button>
+        </div>
+    </nav>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Login Admin</h2>
+                <button onclick="closeLoginModal()" class="close-btn">&times;</button>
+            </div>
+            
+            <div id="errorMessage" class="error-message"></div>
+            
+            <div id="loading" class="loading">
+                <div class="loading-spinner"></div>
+                <p>Memproses...</p>
+            </div>
+
+            <form id="loginForm" onsubmit="handleLogin(event); return false;">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        required 
+                        autocomplete="email"
+                        placeholder="Masukkan email admin"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        required 
+                        autocomplete="current-password"
+                        placeholder="Masukkan password"
+                    >
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    Login
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script>
+        const supabase = window.supabase.createClient(
+            'https://rzhcxyfapjxjbaeirmfy.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6aGN4eWZhcGp4amJhZWlybWZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAzODY5MTksImV4cCI6MjA1NTk2MjkxOX0.cx8dqPrG_BVgn5eFrSx6EiK-IE3B5a84QmNBNAiSKUI'
+        );
+
+        function showLoginModal() {
+            document.getElementById('loginModal').style.display = 'flex';
+            document.getElementById('email').focus();
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').style.display = 'none';
+            document.getElementById('loginForm').reset();
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const submitBtn = document.getElementById('submitBtn');
+            const errorMessage = document.getElementById('errorMessage');
+            const loading = document.getElementById('loading');
+
+            errorMessage.style.display = 'none';
+            loading.style.display = 'block';
+            submitBtn.disabled = true;
+
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password
+                });
+
+                if (error) {
+                    throw error;
+                }
+
+                if (data?.user) {
+                    window.location.href = 'admin/dashboard.html';
+                }
+            } catch (error) {
+                let errorMsg = 'Login gagal. ';
+                if (error.message.includes('Invalid login credentials')) {
+                    errorMsg += 'Email atau password salah.';
+                } else {
+                    errorMsg += error.message;
+                }
+                errorMessage.textContent = errorMsg;
+                errorMessage.style.display = 'block';
+            } finally {
+                loading.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+            return false;
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('loginModal');
+            if (event.target === modal) {
+                closeLoginModal();
+            }
+        }
+
+        // Close modal on escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeLoginModal();
+            }
+        });
+
+        // Check if already logged in
+        document.addEventListener('DOMContentLoaded', async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                window.location.href = 'admin/dashboard.html';
+            }
+        });
+    </script>
+
+    <main>
+        <section class="sambutan-section">
+            <div class="sambutan-container">
+                <div class="kepala-sekolah-profile">
+                    <img src="src\img\foto-kepala-sekolah.png" 
+                         alt="Foto Kepala Sekolah" 
+                         class="kepala-sekolah-img">
+                    <h3 class="kepala-sekolah-name">Erlina, S.Ag</h3>
+                    <p class="kepala-sekolah-title">Kepala Sekolah MI Nurul Islam</p>
+                </div>
+                
+                <div class="sambutan-content">
+                    <h2 class="sambutan-title">Sambutan Kepala Sekolah</h2>
+                    <p class="sambutan-text">
+                        Assalamu'alaikah Warahmatullahi Wabarakatuh,
+                    </p>
+                    <p class="sambutan-text">
+                        Puji syukur kita panjatkan ke hadirat Allah SWT yang telah memberikan rahmat dan karunia-Nya kepada kita semua. Sebagai Kepala Sekolah MI Nurul Islam, saya mengucapkan selamat datang di website resmi kami.
+                    </p>
+                    <p class="sambutan-text">
+                        MI Nurul Islam hadir sebagai wadah pendidikan yang tidak hanya fokus pada pengembangan intelektual, tetapi juga pembentukan karakter dan nilai-nilai keislaman. Kami berkomitmen untuk membentuk generasi yang berakhlak mulia, cerdas, dan siap menghadapi tantangan masa depan.
+                    </p>
+                    <p class="sambutan-text">
+                        Melalui berbagai program unggulan dan fasilitas yang memadai, kami berupaya memberikan pendidikan terbaik bagi putra-putri bangsa. Dukungan dari seluruh stakeholder, termasuk orang tua dan masyarakat, sangat berarti bagi kemajuan sekolah kami.
+                    </p>
+                    <p class="sambutan-text">
+                        Wassalamu'alaikah Warahmatullahi Wabarakatuh
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section class="features">
+            <!-- Feature cards tetap sama seperti sebelumnya -->
+            <div class="feature-card">
+                <h3>Visi</h3>
+                <p>Mewujudkan warga sekolah yang Terampil, Berperilaku, Berakhlak, serta Beriman dan Bertakwa kepada Allah SWT.</p>
+            </div>
+
+            <div class="feature-card">
+                <h3>Misi</h3>
+                <p>Menciptakan manusia yang peduli terhadap ilmu agama dalam rangka mengembangkan sumber daya manusia yang berkualitas.</p>
+            </div>
+
+            <div class="feature-card">
+                <h3>Sejarah</h3>
+                <p>MI Nurul Islam Pondok Kresek mulai beroperasi pada 17 Juli 1997 dan hingga kini aktif dalam proses belajar mengajar untuk mencerdaskan anak bangsa secara intelektual dan spiritual. Meskipun menghadapi banyak tantangan, sekolah terus berbenah dan memberikan pelayanan maksimal kepada siswa. Dukungan dari pemerintah, masyarakat, dan orang tua murid sangat membantu keberlangsungan sekolah melalui berbagai kegiatan dan bantuan.</p>
+            </div>
+
+            <div class="feature-card">
+                <h3>Kurikulum</h3>
+                <p>Mengintegrasikan kurikulum nasional dengan nilai-nilai Islam untuk pembentukan karakter yang komprehensif.</p>
+            </div>
+
+            <div class="feature-card">
+                <h3>Fasilitas</h3>
+                <p>Dilengkapi dengan fasilitas modern untuk mendukung proses belajar mengajar yang optimal.</p>
+            </div>
+
+            <div class="feature-card">
+                <h3>Ekstrakurikuler</h3>
+                <p>Menyediakan berbagai kegiatan pengembangan bakat dan minat siswa di luar jam pelajaran.</p>
+            </div>
+
+            <div class="feature-card">
+                <h3>Prestasi</h3>
+                <p>Berbagai pencapaian akademik dan non-akademik telah diraih oleh siswa-siswi MI Nurul Islam.</p>
+            </div>
+
+            <div class="feature-card">
+                <h3>Lingkungan</h3>
+                <p>Menciptakan suasana belajar yang nyaman, aman, dan kondusif untuk perkembangan optimal siswa.</p>
+            </div>
+
+            <div class="feature-card">
+                <h3>Komunitas</h3>
+                <p>Membangun kerjasama yang erat antara sekolah, orang tua, dan masyarakat sekitar.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <!-- Footer content tetap sama -->
+        <div class="footer-content">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h3>Alamat</h3>
+                    <p>SIMPANG ACONG RT 01 RW 02 DUSUN II PONDOK KRESEK, SIARANG ARANG, Kec. Pujud, Kab. Rokan Hilir, Riau</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Kontak</h3>
+                    <a href="tel:+6281371296595">Telepon: +62 813 7129 6595</a>
+                    <a href="mailto:misnurulislampondokkresek@gmail.com">Email: misnurulislampondokkresek@gmail.com</a>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Jam Operasional</h3>
+                    <p>Senin - Kamis: 07:30 - 12:00 WIB</p>
+                    <p>Jumat: 07:30 - 11:00 WIB</p>
+                    <p>Sabtu: 07:30 - 11:00 WIB</p>
+                    <p>Minggu: Libur</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 MI Nurul Islam. Hak Cipta Dilindungi.
+                    - Dibuat oleh: <a href="https://www.instagram.com/srirezekysetiani_05?igsh=cGJ6Ymx5czZvbWl2&utm_source=qr" target="_blank">Sri Rezeki Setiani</a>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navToggle = document.querySelector('.nav-toggle');
+            const navLinks = document.querySelector('.nav-links');
+
+            navToggle.addEventListener('click', function() {
+                navLinks.classList.toggle('active');
+            });
+
+            document.addEventListener('click', function(event) {
+                if (!event.target.closest('.navbar')) {
+                    navLinks.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
